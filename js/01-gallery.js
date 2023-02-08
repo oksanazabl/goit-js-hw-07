@@ -1,8 +1,6 @@
 import { galleryItems } from './gallery-items.js';
 // Change code below this line
 const gallery = document.querySelector('.gallery');
-const modal = document.querySelector('.lightbox');
-const modalImg = document.querySelector('.lightbox_img');
 
 const galleryMarkup = galleryItems.map(({ preview, original, description }) => {
   return ` <div class="gallery__item">
@@ -12,22 +10,31 @@ const galleryMarkup = galleryItems.map(({ preview, original, description }) => {
   </div>`;
 });
 
-gallery.insertAdjacentHTML('beforeend', galleryMarkup.join(''));
-
-gallery.addEventListener('click', event => {
-  event.preventDefault();
-  if (event.target.nodeName !== 'IMG') {
+const openModal = e => {
+  e.preventDefault();
+  if (!e.target.classList.contains('gallery__image')) {
     return;
   }
-  modal.classList.add('is-open');
-  modalImg.src = event.target.dataset.source;
-  modalImg.alt = event.target.alt;
-});
 
-modal.addEventListener('click', event => {
-  if (event.target.nodeName !== 'IMG') {
-    modal.classList.remove('is-open');
-    modalImg.src = '';
-    modalImg.alt = '';
-  }
-});
+  const exampl = basicLightbox.create(
+    `<img src="${e.target.dataset.source}" width="800" height="600">`,
+    {
+      onShow: exampl => {
+        window.addEventListener('keydown', closeModal);
+      },
+      onClose: exampl => {
+        window.removeEventListener('keydown', closeModal);
+      },
+    }
+  );
+
+  const closeModal = e => {
+    if (e.code === 'Escape') {
+      exampl.close();
+    }
+  };
+  exampl.show();
+};
+
+gallery.insertAdjacentHTML('beforeend', galleryMarkup.join(''));
+gallery.addEventListener('click', openModal);
